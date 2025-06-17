@@ -1,7 +1,11 @@
+
+
+#pip install streamlit pdf2image pillow pytesseract
+
 #Taking more time for hand written text 
 
 import streamlit as st
-from pdf2image import convert_from_bytes
+from pdf2image import convert_from_bytes, convert_from_path
 from PIL import Image, ImageDraw
 import pytesseract
 import os
@@ -16,8 +20,9 @@ st.set_page_config(page_title="Scanned PDF Text Search", layout="wide")
 st.title("🔍 Search & Highlight in Scanned PDF")
 
 # PDF path on your system
-#uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\scanned1.pdf"
-uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\ammu_doc.pdf"
+#uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\seeds.pdf"
+uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\scanned1.pdf"
+#uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\ammu_doc.pdf"
 # Try loading the PDF
 if not os.path.exists(uploaded_pdf_path):
     st.error(f"❌ PDF file not found at path:\n`{uploaded_pdf_path}`")
@@ -36,7 +41,8 @@ else:
         search_term = search_term.strip()
         st.info("Processing PDF... This may take a moment ⏳")
 
-        images = convert_from_bytes(pdf_data, poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin")
+        #images = convert_from_bytes(pdf_data, poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin")
+        images = convert_from_path(r"C:\Users\Srilatha\Downloads\scanned1.pdf", poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin")
         found_any = False
 
         for page_num, image in enumerate(images):
