@@ -20,9 +20,7 @@ st.set_page_config(page_title="Scanned PDF Text Search", layout="wide")
 st.title("🔍 Search & Highlight in Scanned PDF")
 
 # PDF path on your system
-#uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\seeds.pdf"
 uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\scanned1.pdf"
-#uploaded_pdf_path = r"C:\Users\Srilatha\Downloads\ammu_doc.pdf"
 # Try loading the PDF
 if not os.path.exists(uploaded_pdf_path):
     st.error(f"❌ PDF file not found at path:\n`{uploaded_pdf_path}`")
@@ -34,15 +32,16 @@ else:
         st.error(f"Error reading file: {e}")
         pdf_data = None
 
-    # Ask user for search term
-    search_term = st.text_input("Enter text to search (case-insensitive)", placeholder="e.g., report, value, formula")
+    search_term = st.text_input("Enter text to search (case-insensitive, multiple words separated by space)", placeholder="e.g., report value formula")
 
     if pdf_data and search_term.strip():
-        search_term = search_term.strip()
+        search_terms = [term.strip().lower() for term in search_term.strip().split()]
         st.info("Processing PDF... This may take a moment ⏳")
 
-        #images = convert_from_bytes(pdf_data, poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin")
-        images = convert_from_path(r"C:\Users\Srilatha\Downloads\scanned1.pdf", poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin")
+        images = convert_from_path(
+            uploaded_pdf_path,
+            poppler_path=r"C:\Users\Srilatha\poppler-24.08.0\Library\bin"
+        )
         found_any = False
 
         for page_num, image in enumerate(images):
@@ -52,10 +51,15 @@ else:
 
             for i, word in enumerate(ocr_data['text']):
                 word_text = word.strip()
-                if word_text and search_term.lower() in word_text.lower():
-                    x, y, w, h = ocr_data['left'][i], ocr_data['top'][i], ocr_data['width'][i], ocr_data['height'][i]
-                    draw.rectangle([x, y, x + w, y + h], fill=(255, 0, 0, 80), outline="red", width=2)
-                    matches += 1
+                if word_text:
+                    word_lower = word_text.lower()
+                    for term in search_terms:
+                        if term in word_lower:
+                            x, y, w, h = (ocr_data['left'][i], ocr_data['top'][i],
+                                          ocr_data['width'][i], ocr_data['height'][i])
+                            draw.rectangle([x, y, x + w, y + h], fill=(255, 0, 0, 80), outline="red", width=2)
+                            matches += 1
+                            break  # Avoid multiple matches on the same word
 
             if matches > 0:
                 found_any = True
@@ -68,4 +72,3 @@ else:
 
     elif pdf_data and not search_term:
         st.info("Please enter text to search in the box above.")
-        
